@@ -8,6 +8,19 @@ import pandas as pd
 import os
 import sys
 
+STOP_WORDS = [
+    "a", "an", "the", "and", "or", "but", "so", "for", "nor", "yet", "in", "on", "at", 
+    "by", "with", "about", "against", "between", "into", "through", "during", "before", 
+    "after", "above", "below", "to", "from", "up", "down", "under", "over", "of", "off", 
+    "I", "me", "my", "mine", "we", "us", "our", "ours", "you", "your", "yours", "he", 
+    "him", "his", "she", "her", "hers", "it", "its", "they", "them", "their", "theirs", 
+    "is", "am", "are", "was", "were", "be", "been", "being", "have", "has", "had", 
+    "will", "would", "shall", "should", "can", "could", "may", "might", "must", 
+    "not", "very", "too", "then", "there", "here", "when", "where", "why", "how", 
+    "do", "does", "did", "doing", "that", "this", "these", "those", "which", "what", 
+    "who", "whom", "whose", "any", "each", "such", "only", "own", "same"
+]
+
 # file finder
 def find_file_path(file):
     file_path = None
@@ -42,8 +55,10 @@ def text_preprocessing():
     
     #convert text to lowercase
     list_sample_data_to_lowercase = [list_of_sample_data[i][0].lower() for i in range(len(list_of_sample_data))]
-    
-    print(list_sample_data_to_lowercase)
+
+    #remove the words like "is", "the" etc
+    sample_without_stopwords = [list_sample_data_to_lowercase[i] for i in range(len(list_sample_data_to_lowercase))]
+    print(sample_without_stopwords)
     
 
 text_preprocessing()
