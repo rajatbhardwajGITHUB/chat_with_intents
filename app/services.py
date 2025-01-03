@@ -27,6 +27,29 @@ def find_file_path(file):
 def data_extraction():
     file_path = find_file_path("dataSet.xlsx")
     df = pd.read_excel(file_path)
-    print(df["Intent"])
+    #print(type(df))
+    #df_list = df.values.tolist()
+    return df
 
-data_extraction()
+
+def text_preprocessing():
+    # convert the text into lower case
+    # remove words like "is", "the"
+    # reduce words to the root form or lemmetization
+    # tokenize sentences into words
+
+    list_of_sample_data = data_extraction().values.tolist()
+    
+    #convert text to lowercase
+    list_sample_data_to_lowercase = [list_of_sample_data[i][0].lower() for i in range(len(list_of_sample_data))]
+    
+    print(list_sample_data_to_lowercase)
+    
+
+text_preprocessing()
+
+# def test():
+#     df = data_extraction()
+#     print(df[])
+
+# test()
