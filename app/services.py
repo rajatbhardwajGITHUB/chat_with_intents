@@ -1,70 +1,70 @@
-# extract the dataset from excel file
-# train a model based on the data set
-
-# Dataset Extraction
-# we will be using pandas for this
-
 import pandas as pd
 import os
 import sys
+import spacy
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LogisticRegression
 
-STOP_WORDS = [
-    "a", "an", "the", "and", "or", "but", "so", "for", "nor", "yet", "in", "on", "at", 
-    "by", "with", "about", "against", "between", "into", "through", "during", "before", 
-    "after", "above", "below", "to", "from", "up", "down", "under", "over", "of", "off", 
-    "I", "me", "my", "mine", "we", "us", "our", "ours", "you", "your", "yours", "he", 
-    "him", "his", "she", "her", "hers", "it", "its", "they", "them", "their", "theirs", 
-    "is", "am", "are", "was", "were", "be", "been", "being", "have", "has", "had", 
-    "will", "would", "shall", "should", "can", "could", "may", "might", "must", 
-    "not", "very", "too", "then", "there", "here", "when", "where", "why", "how", 
-    "do", "does", "did", "doing", "that", "this", "these", "those", "which", "what", 
-    "who", "whom", "whose", "any", "each", "such", "only", "own", "same"
-]
+nlp = spacy.load("en_core_web_sm")
 
-# file finder
+# File finder
 def find_file_path(file):
     file_path = None
-    sys.path.insert(0,"/home/john/Documents/fastapi/chats_with_intents/")
+    sys.path.insert(0, "/home/john/Documents/fastapi/chats_with_intents/")
     for path in sys.path:
         pot_path = os.path.join(path, file)
         if os.path.exists(pot_path):
             file_path = pot_path
             break
-    if file_path:
-        return file_path
-    else :
-        return "No path for such file"
+    return file_path if file_path else "No path for such file"
 
-
-# data extractor
+# Data extractor
 def data_extraction():
     file_path = find_file_path("dataSet.xlsx")
     df = pd.read_excel(file_path)
-    #print(type(df))
-    #df_list = df.values.tolist()
     return df
 
+# Preprocessing function
+def preprocessing(sentences):
+    preprocessed_sentences = []
+    for sent in sentences:
+        doc = nlp(sent)
+        tokens = []
+        for token in doc:
+            if not token.is_stop and not token.is_punct:
+                tokens.append(token.lemma_)
+        preprocessed_sentences.append(" ".join(tokens))
+    return preprocessed_sentences
 
-def text_preprocessing():
-    # convert the text into lower case
-    # remove words like "is", "the"
-    # reduce words to the root form or lemmetization
-    # tokenize sentences into words
+# Vectorization
+def vectorization(sentences, vectorizer=None):
+    if vectorizer is None:
+        vectorizer = CountVectorizer()
+        x = vectorizer.fit_transform(sentences)
+        return x, vectorizer
+    else:
+        x = vectorizer.transform(sentences)
+        return x
 
-    list_of_sample_data = data_extraction().values.tolist()
-    
-    #convert text to lowercase
-    list_sample_data_to_lowercase = [list_of_sample_data[i][0].lower() for i in range(len(list_of_sample_data))]
+# Training function
+def training():
+    data = data_extraction()
+    intents = data["Intent"].tolist()
+    sentences = data["Sentence"].tolist()
+    preprocessed_sentences = preprocessing(sentences)
+    x, vectorizer = vectorization(preprocessed_sentences)
+    classifier = LogisticRegression()
+    classifier.fit(x, intents)
+    return classifier, vectorizer
 
-    #remove the words like "is", "the" etc
-    sample_without_stopwords = [list_sample_data_to_lowercase[i] for i in range(len(list_sample_data_to_lowercase))]
-    print(sample_without_stopwords)
-    
+# Main code
+classifier, vectorizer = training()
 
-text_preprocessing()
+# Test phase
+test_sentence = "How's the day?"
+test_processed = preprocessing([test_sentence])  # Wrap test sentence in a list
+test_vector = vectorization(test_processed, vectorizer)
+predicted_intent = classifier.predict(test_vector)
 
-# def test():
-#     df = data_extraction()
-#     print(df[])
-
-# test()
+print(f"Sentence: {test_sentence}")
+print(f"Predicted Intent: {predicted_intent[0]}")
